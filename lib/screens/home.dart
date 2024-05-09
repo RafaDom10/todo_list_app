@@ -1,4 +1,8 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -11,7 +15,29 @@ class _HomeState extends State<Home> {
   final List _toDoList = [];
   final TextEditingController _toDoController = TextEditingController();
 
-  void onPressed(BuildContext context) {
+  Future<File> _openFile() async {
+    final dir = await getApplicationDocumentsDirectory();
+    return File('${dir.path}/toDoList.json');
+  }
+
+  Future<File> _saveData() async {
+    String data = json.encode(_toDoList);
+    final file = await _openFile();
+    return file.writeAsString(data);
+  }
+
+  void _addTask() {
+    setState(() {
+      Map<String, dynamic> newTask = {};
+      newTask['title'] = _toDoController.text;
+      newTask['done'] = false;
+      _toDoController.text = '';
+      _toDoList.add(newTask);
+      _saveData();
+    });
+  }
+
+  void _onPressed(BuildContext context) {
     if (_toDoController.text.isEmpty) {
       SnackBar alert = SnackBar(
         content: const Text('Nome da tarefa é obrigatório'),
@@ -26,6 +52,8 @@ class _HomeState extends State<Home> {
       ScaffoldMessenger.of(context).removeCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(alert);
     }
+
+    _addTask();
   }
 
   @override
@@ -53,7 +81,7 @@ class _HomeState extends State<Home> {
                     height: 45.0,
                     width: 45.0,
                     child: FloatingActionButton(
-                      onPressed: () => onPressed(context),
+                      onPressed: () => _onPressed(context),
                       child: const Icon(Icons.save),
                     ),
                   )
