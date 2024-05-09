@@ -4,7 +4,6 @@ ThemeData darkTheme() {
   return ThemeData(
       brightness: Brightness.dark,
       primaryColor: Colors.black,
-      colorScheme: ThemeData().colorScheme.copyWith(secondary: Colors.orange),
       appBarTheme: const AppBarTheme(color: Colors.grey),
       scaffoldBackgroundColor: Colors.grey[800],
       iconTheme: const IconThemeData(color: Colors.white),
@@ -21,8 +20,7 @@ ThemeData lightTheme() {
   return ThemeData(
       brightness: Brightness.light,
       primaryColor: Colors.purple,
-      colorScheme: ThemeData().colorScheme.copyWith(secondary: Colors.orange),
-      appBarTheme: const AppBarTheme(color: Colors.grey),
+      appBarTheme: AppBarTheme(color: Colors.lightBlue[700]),
       scaffoldBackgroundColor: Colors.white,
       iconTheme: const IconThemeData(color: Colors.white),
       hintColor: Colors.orange,
