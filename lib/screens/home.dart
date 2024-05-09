@@ -12,10 +12,32 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final List _toDoList = [];
+  List _toDoList = [];
   final TextEditingController _toDoController = TextEditingController();
   late int _indexOfLastRemoved;
   late Map<String, dynamic> _lastRemoved;
+
+  @override
+  void initState() {
+    super.initState();
+    _getData().then((value) => {
+          if (value != null)
+            {
+              setState(() {
+                _toDoList = json.decode(value);
+              })
+            }
+        });
+  }
+
+  Future<String?> _getData() async {
+    try {
+      final archive = await _openFile();
+      return archive.readAsString();
+    } catch (err) {
+      return null;
+    }
+  }
 
   Future<File> _openFile() async {
     final dir = await getApplicationDocumentsDirectory();
@@ -26,6 +48,26 @@ class _HomeState extends State<Home> {
     String data = json.encode(_toDoList);
     final file = await _openFile();
     return file.writeAsString(data);
+  }
+
+  Future<Null> _reload() async {
+    await Future.delayed(const Duration(seconds: 1));
+    setState(() {
+      _toDoList.sort((a, b) {
+        if (a['done'] && !b['done']) {
+          return 1;
+        }
+
+        if (!a['done'] && b['done']) {
+          return -1;
+        }
+
+        return 0;
+      });
+      _saveData();
+    });
+
+    return null;
   }
 
   void _addTask() {
@@ -156,7 +198,7 @@ class _HomeState extends State<Home> {
             const Padding(padding: EdgeInsets.only(top: 10.0)),
             Expanded(
                 child: RefreshIndicator(
-              onRefresh: _saveData,
+              onRefresh: _reload,
               child: ListView.builder(
                   itemBuilder: widgetTask,
                   itemCount: _toDoList.length,

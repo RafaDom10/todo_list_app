@@ -20,7 +20,7 @@ ThemeData lightTheme() {
   return ThemeData(
       brightness: Brightness.light,
       primaryColor: Colors.purple,
-      appBarTheme: AppBarTheme(color: Colors.lightBlue[700]),
+      appBarTheme: const AppBarTheme(color: Colors.deepPurple),
       scaffoldBackgroundColor: Colors.white,
       iconTheme: const IconThemeData(color: Colors.white),
       hintColor: Colors.orange,
