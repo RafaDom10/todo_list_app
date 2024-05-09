@@ -56,6 +56,48 @@ class _HomeState extends State<Home> {
     _addTask();
   }
 
+  Widget widgetTask(BuildContext context, int index) {
+    return Dismissible(
+        key: Key(DateTime.now().microsecondsSinceEpoch.toString()),
+        background: Container(
+          color: Colors.red,
+          child: const Align(
+            alignment: Alignment(0.5, 0.0),
+            child: Icon(
+              Icons.delete_sweep_outlined,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        direction: DismissDirection.endToStart,
+        onDismissed: (direction) => {
+          setState(() {
+            
+          });
+        },
+        child: CheckboxListTile(
+          title: Text('${_toDoList[index]['title']}'),
+          value: _toDoList[index]['done'],
+          secondary: CircleAvatar(
+            backgroundColor: Theme.of(context).primaryColor,
+            child: Icon(
+              _toDoList[index]['done'] ? Icons.check : Icons.error,
+              color: Theme.of(context).iconTheme.color,
+            ),
+          ),
+          onChanged: (value) => {
+            setState(() {
+              _toDoList[index]['done'] = value;
+              _saveData();
+            })
+          },
+          checkColor: Theme.of(context).primaryColor,
+          activeColor: Theme.of(context).secondaryHeaderColor,
+        )
+        
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,7 +129,16 @@ class _HomeState extends State<Home> {
                   )
                 ],
               ),
-            )
+            ),
+            const Padding(padding: EdgeInsets.only(top: 10.0)),
+            Expanded(
+                child: RefreshIndicator(
+              onRefresh: null,
+              child: ListView.builder(
+                  itemBuilder: widgetTask,
+                  itemCount: _toDoList.length,
+                  padding: const EdgeInsets.only(top: 10.0)),
+            ))
           ],
         ),
       ),
