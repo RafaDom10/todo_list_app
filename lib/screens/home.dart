@@ -14,6 +14,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final List _toDoList = [];
   final TextEditingController _toDoController = TextEditingController();
+  late int _indexOfLastRemoved;
+  late Map<String, dynamic> _lastRemoved;
 
   Future<File> _openFile() async {
     final dir = await getApplicationDocumentsDirectory();
@@ -51,9 +53,35 @@ class _HomeState extends State<Home> {
 
       ScaffoldMessenger.of(context).removeCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(alert);
+    } else {
+      _addTask();
     }
+  }
 
-    _addTask();
+  void _onDismissed(
+      DismissDirection direction, int index, BuildContext context) {
+    setState(() {
+      _lastRemoved = Map.from(_toDoList[index]);
+      _indexOfLastRemoved = index;
+      _toDoList.removeAt(index);
+      _saveData();
+    });
+
+    SnackBar snack = SnackBar(
+      duration: const Duration(seconds: 5),
+      content: Text('Tarefa "${_lastRemoved['title']}" removida.'),
+      action: SnackBarAction(
+          label: 'Desfazer',
+          onPressed: () => {
+                setState(() {
+                  _toDoList.insert(_indexOfLastRemoved, _lastRemoved);
+                  _saveData();
+                })
+              }),
+    );
+
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(snack);
   }
 
   Widget widgetTask(BuildContext context, int index) {
@@ -70,11 +98,7 @@ class _HomeState extends State<Home> {
           ),
         ),
         direction: DismissDirection.endToStart,
-        onDismissed: (direction) => {
-          setState(() {
-            
-          });
-        },
+        onDismissed: (direction) => _onDismissed(direction, index, context),
         child: CheckboxListTile(
           title: Text('${_toDoList[index]['title']}'),
           value: _toDoList[index]['done'],
@@ -93,16 +117,15 @@ class _HomeState extends State<Home> {
           },
           checkColor: Theme.of(context).primaryColor,
           activeColor: Theme.of(context).secondaryHeaderColor,
-        )
-        
-        );
+        ));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ToDo List'),
+        title: const Text('ToDo List',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: Builder(
@@ -133,7 +156,7 @@ class _HomeState extends State<Home> {
             const Padding(padding: EdgeInsets.only(top: 10.0)),
             Expanded(
                 child: RefreshIndicator(
-              onRefresh: null,
+              onRefresh: _saveData,
               child: ListView.builder(
                   itemBuilder: widgetTask,
                   itemCount: _toDoList.length,
